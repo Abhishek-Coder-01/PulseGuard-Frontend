@@ -2448,7 +2448,7 @@ function PulseGuardDashboard() {
           />
         )}
 
-        <footer className="relative mt-12 mb-6">
+        <footer className="relative mt-10 mb-6">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-700 to-transparent"></div>
           <div className="text-center text-xs text-gray-600 mt-12 font-mono pt-6 border-t border-gray-300 dark:border-gray-700">
             Built with PulseGuard v1.0 &mdash; Powered by Abhishek Yadav
