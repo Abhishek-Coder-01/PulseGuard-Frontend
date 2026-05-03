@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:5000/api";
+const BASE_URL = "https://pulseguard-backend-yuyh.onrender.com/api";
 const DEFAULT_TIMEOUT_MS = 15000;
 
 // ─── Common helper ─────────────────────────────────────────────────────────────
