@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Clover — AI Business Card</title>
+  <meta name="description"
+    content="Maximize savings with Clover, the AI-powered business card that optimizes every purchase, giving you unmatched value effortlessly." />
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,500;1,600;1,700&family=Inter:wght@300;400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap"
+    rel="stylesheet" />
+
+  <!-- Tailwind Config -->
+  <script>
+      (() => {
+        const storageKey = 'pulseguard-theme';
+        const storedTheme = localStorage.getItem(storageKey);
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const theme = storedTheme === 'light' || storedTheme === 'dark'
+          ? storedTheme
+          : (prefersDark ? 'dark' : 'light');
+
+        document.documentElement.classList.toggle('dark', theme === 'dark');
+      })();
+
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+              display: ['Plus Jakarta Sans', 'sans-serif'],
+              serif: ['Instrument Serif', 'serif'],
+            },
+            colors: {
+              ink: {
+                DEFAULT: 'rgb(var(--color-ink) / <alpha-value>)',
+                900: 'rgb(var(--color-ink-900) / <alpha-value>)',
+                800: 'rgb(var(--color-ink-800) / <alpha-value>)',
+                700: 'rgb(var(--color-ink-700) / <alpha-value>)',
+                600: 'rgb(var(--color-ink-600) / <alpha-value>)',
+                500: 'rgb(var(--color-ink-500) / <alpha-value>)',
+              },
+              mint: {
+                50: 'rgb(var(--color-mint-50) / <alpha-value>)',
+                100: 'rgb(var(--color-mint-100) / <alpha-value>)',
+                200: 'rgb(var(--color-mint-200) / <alpha-value>)',
+                300: 'rgb(var(--color-mint-300) / <alpha-value>)',
+                400: 'rgb(var(--color-mint-400) / <alpha-value>)',
+                500: 'rgb(var(--color-mint-500) / <alpha-value>)',
+                600: 'rgb(var(--color-mint-600) / <alpha-value>)',
+                700: 'rgb(var(--color-mint-700) / <alpha-value>)',
+                800: 'rgb(var(--color-mint-800) / <alpha-value>)',
+                900: 'rgb(var(--color-mint-900) / <alpha-value>)',
+              },
+              cream: 'rgb(var(--color-cream) / <alpha-value>)',
+              sand: 'rgb(var(--color-sand) / <alpha-value>)',
+              accent: {
+                green: 'rgb(var(--color-accent-green) / <alpha-value>)',
+                blue: 'rgb(var(--color-accent-blue) / <alpha-value>)',
+                red: 'rgb(var(--color-accent-red) / <alpha-value>)',
+              },
+            },
+            boxShadow: {
+              'glow-mint': 'var(--shadow-glow-mint)',
+              'glow-soft': 'var(--shadow-glow-soft)',
+              'card': 'var(--shadow-card)',
+              'card-hover': 'var(--shadow-card-hover)',
+              'inset-glow': 'var(--shadow-inset-glow)',
+            },
+            backgroundImage: {
+              'mesh-hero': 'var(--bg-mesh-hero)',
+              'mesh-soft': 'var(--bg-mesh-soft)',
+              'grid-faint': 'var(--bg-grid-faint)',
+            },
+            animation: {
+              'float-slow': 'floatY 6s ease-in-out infinite',
+              'float-slower': 'floatY 8s ease-in-out infinite',
+              'fade-up': 'fadeUp 0.8s ease both',
+              'spin-slow': 'spin 18s linear infinite',
+              'pulse-soft': 'pulseSoft 3s ease-in-out infinite',
+              'gradient-x': 'gradientX 8s ease infinite',
+              'shimmer': 'shimmer 2.5s linear infinite',
+            },
+            keyframes: {
+              floatY: {
+                '0%,100%': { transform: 'translateY(0) rotate(0deg)' },
+                '50%': { transform: 'translateY(-18px) rotate(2deg)' },
+              },
+              fadeUp: {
+                '0%': { opacity: '0', transform: 'translateY(24px)' },
+                '100%': { opacity: '1', transform: 'translateY(0)' },
+              },
+              pulseSoft: {
+                '0%,100%': { opacity: '0.7', transform: 'scale(1)' },
+                '50%': { opacity: '1', transform: 'scale(1.05)' },
+              },
+              gradientX: {
+                '0%,100%': { backgroundPosition: '0% 50%' },
+                '50%': { backgroundPosition: '100% 50%' },
+              },
+              shimmer: {
+                '0%': { backgroundPosition: '-1000px 0' },
+                '100%': { backgroundPosition: '1000px 0' },
+              },
+            },
+          },
+        },
+      };
+    </script> 
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+
+</html>
