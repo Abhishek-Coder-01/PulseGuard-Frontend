@@ -38,10 +38,8 @@ export default function Testimonials() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5" data-aos="zoom-in-up" >
           <div
-            data-reveal
-            data-aos="fade-up-right"
             className="bg-white border border-ink/5 rounded-3xl p-7 shadow-card hover:shadow-card-hover transition-all hover:-translate-y-1 flex flex-col gap-5"
           >
             <div className="flex items-center justify-between">
@@ -69,9 +67,6 @@ export default function Testimonials() {
           </div>
 
           <div
-            data-reveal
-            data-aos="zoom-in-up"
-            data-aos-delay="100"
             className="relative bg-gradient-to-br from-ink via-ink-700 to-ink-600 text-white rounded-3xl p-7 shadow-glow-mint overflow-hidden flex flex-col gap-5 md:scale-105 md:-mt-2"
           >
             <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full bg-mint-500/30 blur-3xl"></div>
@@ -97,9 +92,6 @@ export default function Testimonials() {
           </div>
 
           <div
-            data-reveal
-            data-aos="fade-up-left"
-            data-aos-delay="180"
             className="bg-white border border-ink/5 rounded-3xl p-7 shadow-card hover:shadow-card-hover transition-all hover:-translate-y-1 flex flex-col gap-5"
           >
             <div className="flex items-center justify-between">

@@ -221,7 +221,7 @@ export default function Footer() {
             </div>
 
             {/* Quick Links */}
-            <div data-aos="fade-up" data-aos-delay="80" className="lg:col-span-1">
+            <div data-aos="zoom-in-up" data-aos-delay="80" className="lg:col-span-1">
               <h3 className="text-lg font-bold mb-6 !text-white">Quick Links</h3>
               <ul className="space-y-3 text-gray-400">
                 <li className="hover:text-emerald-400 cursor-pointer transition-colors">Home</li>
@@ -233,7 +233,7 @@ export default function Footer() {
             </div>
 
             {/* Resources */}
-            <div data-aos="fade-up" data-aos-delay="140" className="lg:col-span-1">
+            <div data-aos="zoom-in-up" data-aos-delay="140" className="lg:col-span-1">
               <h3 className="text-lg font-bold mb-6 !text-white">Resources</h3>
               <ul className="space-y-3 text-gray-400">
                 <li className="hover:text-emerald-400 cursor-pointer transition-colors">Documentation</li>
@@ -244,7 +244,7 @@ export default function Footer() {
             </div>
 
             {/* Support */}
-            <div data-aos="fade-up-left" data-aos-delay="220" className="lg:col-span-2">
+            <div data-aos="zoom-in-up" data-aos-delay="220" className="lg:col-span-2">
               <h3 className="text-lg font-bold mb-6 !text-white">Support</h3>
               <div className="grid grid-cols-2 gap-4 text-gray-400">
                 <ul className="space-y-3">
@@ -279,7 +279,7 @@ export default function Footer() {
 
           {/* Bottom Bar */}
           <div
-            data-aos="fade-up"
+            data-aos="zoom-in"
             data-aos-delay="280"
             className="border-t border-gray-800 pt-8"
           >

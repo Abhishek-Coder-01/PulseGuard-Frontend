@@ -37,11 +37,9 @@ export default function Pricing() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 max-w-5xl mx-auto" data-aos="zoom-in-up" >
           {/* Starter */}
           <div
-            data-reveal
-            data-aos="fade-up-right"
             className="bg-white border border-ink/5 rounded-3xl p-8 shadow-card hover:shadow-card-hover transition-all hover:-translate-y-1 flex flex-col gap-5"
           >
             <div>
@@ -99,9 +97,6 @@ export default function Pricing() {
 
           {/* Growth (featured) */}
           <div
-            data-reveal
-            data-aos="zoom-in-up"
-            data-aos-delay="100"
             className="relative bg-gradient-to-br from-ink via-ink-700 to-ink-600 text-white rounded-3xl p-8 shadow-glow-mint flex flex-col gap-5 md:scale-105 md:-mt-4 overflow-hidden"
           >
             <div className="absolute -top-20 -right-20 w-72 h-72 rounded-full bg-mint-500/30 blur-3xl"></div>
@@ -179,7 +174,7 @@ export default function Pricing() {
           </div>
 
           {/* Enterprise */}
-          <div data-reveal data-aos="fade-up-left" data-aos-delay="180" className="bg-white border border-ink/5 rounded-3xl p-8 shadow-card flex flex-col gap-5">
+          <div data-reveal data-aos="fade-up" data-aos-delay="180" className="bg-white border border-ink/5 rounded-3xl p-8 shadow-card flex flex-col gap-5">
             <div>
               <div className="text-xs font-bold uppercase tracking-widest text-ink/50 mb-3">Why Free?</div>
               <div className="font-display font-extrabold text-3xl">No Cost. No Limits.</div>

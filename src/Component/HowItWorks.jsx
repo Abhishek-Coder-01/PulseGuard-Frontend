@@ -33,13 +33,11 @@ export default function HowItWorks() {
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 lg:gap-8 relative">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 lg:gap-8 relative" data-aos="zoom-in-up" >
           {/* Connector line on desktop */}
           <div className="hidden md:block absolute top-12 left-[16%] right-[16%] h-px border-t-2 border-dashed border-mint-300 -z-0"></div>
 
           <div
-            data-reveal
-            data-aos="fade-up-right"
             className="relative bg-white border border-mint-200/60 rounded-3xl p-7 shadow-card hover:shadow-card-hover transition-all hover:-translate-y-1 group"
           >
             <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-mint-400 to-mint-600 text-ink font-display font-extrabold text-2xl flex items-center justify-center shadow-glow-soft mb-5 group-hover:rotate-6 transition-transform">
@@ -59,9 +57,6 @@ export default function HowItWorks() {
           </div>
 
           <div
-            data-reveal
-            data-aos="fade-up"
-            data-aos-delay="100"
             className="relative bg-white border border-mint-200/60 rounded-3xl p-7 shadow-card hover:shadow-card-hover transition-all hover:-translate-y-1 group"
           >
             <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-mint-400 to-mint-600 text-ink font-display font-extrabold text-2xl flex items-center justify-center shadow-glow-soft mb-5 group-hover:rotate-6 transition-transform">
@@ -81,9 +76,6 @@ export default function HowItWorks() {
           </div>
 
           <div
-            data-reveal
-            data-aos="fade-up-left"
-            data-aos-delay="180"
             className="relative bg-gradient-to-br from-ink via-ink-700 to-ink-600 text-white rounded-3xl p-7 shadow-card-hover overflow-hidden group"
           >
             <div className="absolute -top-10 -right-10 w-48 h-48 rounded-full bg-mint-500/30 blur-3xl"></div>
