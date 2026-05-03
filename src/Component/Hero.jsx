@@ -299,7 +299,7 @@ export default function Hero() {
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setOpen(false)} />
           <div className="relative bg-white rounded-2xl max-w-4xl w-full shadow-2xl overflow-hidden transform transition-all">
             <div className="flex items-center justify-between p-1 md:p-3 border-b border-gray-100">
-              <h3 id="howItWorksTitle" className="text-md md:text-lg font-black text-gray-900 pl-2 md:pl-0">Watch How It Works?</h3>
+              <h3 id="howItWorksTitle" className="text-md md:text-lg font-black dark:text-white text-gray-900 pl-2 md:pl-0">Watch How It Works?</h3>
               <button
                 ref={closeButtonRef}
                 onClick={() => setOpen(false)}
