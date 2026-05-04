@@ -217,10 +217,10 @@ export default function Hero() {
             <a
               href={primaryHref}
               onClick={handlePrimaryClick}
-              className="magnetic-cta group inline-flex items-center gap-3 rounded-full bg-ink py-2 pl-7 pr-2 text-sm font-semibold !text-white shadow-xl transition-all hover:-translate-y-0.5 hover:shadow-glow-mint"
+              className="magnetic-cta group inline-flex items-center gap-3 rounded-full bg-ink py-2 pl-7 pr-2 text-sm font-semibold !text-white shadow-xl transition-all hover:-translate-y-0.5 dark:hover:bg-gray-700 !dark:hover:shadow-glow-mint"
             >
               <span>{primaryLabel}</span>
-              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-mint-400 text-ink transition-all group-hover:rotate-45 group-hover:bg-white">
+              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-mint-400 !text-ink transition-all group-hover:rotate-45 group-hover:bg-white group-hover:!text-ink dark:group-hover:!text-gray-950">
                 <svg width="16" height="16" viewBox="0 0 14 14" fill="none" aria-hidden="true">
                   <path d="M3 11L11 3M11 3H5M11 3V9" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
                 </svg>
@@ -233,7 +233,7 @@ export default function Hero() {
               type="button"
               className="group inline-flex items-center gap-2.5 rounded-full border border-gray-200 bg-white/70 px-6 py-3.5 text-sm font-semibold text-gray-900 shadow-sm transition-all hover:-translate-y-0.5 hover:border-mint-300 hover:bg-white dark:border-gray-700 dark:bg-gray-900/70 dark:text-gray-100 dark:hover:bg-gray-900"
             >
-              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-mint-100 text-mint-700 transition-colors group-hover:bg-mint-400 group-hover:text-ink dark:bg-mint-200/10 dark:text-mint-500">
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-mint-100 dark:bg-mint-200 text-mint-700 transition-colors group-hover:bg-mint-400 group-hover:text-ink dark:bg-mint-200/10 dark:text-mint-500">
                 <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor" aria-hidden="true">
                   <path d="M3 1l5 4-5 4z" />
                 </svg>
