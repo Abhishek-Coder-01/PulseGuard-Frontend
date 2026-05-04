@@ -1,6 +1,8 @@
 const DEFAULT_API_ORIGIN = "https://pulseguard-backend-yuyh.onrender.com";
 const API_PREFIX = "/api";
 const DEFAULT_TIMEOUT_MS = 15000;
+const PROJECT_CREATION_TIMEOUT_MS = 40000;
+const PROJECT_PING_TIMEOUT_MS = 35000;
 
 function normalizeBaseUrl(baseUrl) {
   const normalizedBaseUrl = String(baseUrl || DEFAULT_API_ORIGIN)
@@ -95,11 +97,13 @@ export const getProjects = async (getToken, options = {}) => {
 };
 
 // ─── ADD PROJECT ───────────────────────────────────────────────────────────────
-export const addProject = async (getToken, projectData) => {
+export const addProject = async (getToken, projectData, options = {}) => {
   const token = await resolveToken(getToken);
   return fetchWithAuth(`${BASE_URL}/projects`, token, {
     method: "POST",
-    body: JSON.stringify(projectData)
+    body: JSON.stringify(projectData),
+    timeoutMs: PROJECT_CREATION_TIMEOUT_MS,
+    ...options
   });
 };
 
@@ -112,11 +116,14 @@ export const deleteProject = async (getToken, projectId) => {
 };
 
 // ─── PING URL ──────────────────────────────────────────────────────────────────
-export const pingUrl = async (getToken, url, projectId) => {
+export const pingUrl = async (getToken, url, projectId, options = {}) => {
   const token = await resolveToken(getToken);
   const params = new URLSearchParams({ url });
   if (projectId) params.append("projectId", projectId);
-  return fetchWithAuth(`${BASE_URL}/projects/ping?${params.toString()}`, token);
+  return fetchWithAuth(`${BASE_URL}/projects/ping?${params.toString()}`, token, {
+    timeoutMs: PROJECT_PING_TIMEOUT_MS,
+    ...options
+  });
 };
 
 // ─── GET PROJECT LOGS (for chart) ─────────────────────────────────────────────
