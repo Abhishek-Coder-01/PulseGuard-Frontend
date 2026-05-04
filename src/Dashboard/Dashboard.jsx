@@ -58,6 +58,8 @@ const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 const MONITOR_FETCH_RETRY_DELAYS_MS = [1000, 2000, 3000];
 const MONITOR_FETCH_TIMEOUT_MS = 15000;
 const MONITOR_UPTIME_TIMEOUT_MS = 10000;
+const MANUAL_RETRY_DELAY_MS = 5000;
+const MANUAL_RETRY_DOWN_THRESHOLD = 2;
 
 /* ============= Error Boundary ============= */
 class ErrorBoundary extends React.Component {
@@ -194,6 +196,14 @@ function SkeletonHeaderHero() {
 /* ============= Helpers ============= */
 function getCssVar(name, fallback = "") {
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback;
+}
+
+function isReachableMonitorStatus(status) {
+  return status === "up" || status === "warning" || status === "critical";
+}
+
+function getRetryDisplayStatus(failureCount) {
+  return failureCount >= MANUAL_RETRY_DOWN_THRESHOLD ? "down" : "checking";
 }
 
 function genHistory(count, upRate, recentDown = false) {
@@ -967,14 +977,24 @@ function MonitorRow({ m, onPing, onDelete, pingLoadingId, deletingMonitorId, isS
     setMenuPingStarted(false);
   }, [menuPingPending, menuPingStarted, pingLoadingId, m.id]);
 
-  const statusLabel = m.status === "up" ? "HEALTHY" : m.status === "warning" ? "WARNING" : m.status === "critical" ? "CRITICAL" : "DOWN";
+  const statusLabel = m.status === "up"
+    ? "HEALTHY"
+    : m.status === "warning"
+      ? "WARNING"
+      : m.status === "critical"
+        ? "CRITICAL"
+        : m.status === "checking"
+          ? "CHECKING"
+          : "DOWN";
   const statusClass = m.status === "up"
     ? "bg-accent-green/10 text-accent-green border-accent-green/20"
     : m.status === "warning"
       ? "bg-yellow-500/10 text-yellow-700 border-yellow-500/20"
       : m.status === "critical"
         ? "bg-orange-500/10 text-orange-700 border-orange-500/20"
-        : "bg-accent-red/10 text-accent-red border-accent-red/20";
+        : m.status === "checking"
+          ? "bg-sky-500/10 text-sky-700 border-sky-500/20"
+          : "bg-accent-red/10 text-accent-red border-accent-red/20";
 
   return (
     <div
@@ -992,7 +1012,7 @@ function MonitorRow({ m, onPing, onDelete, pingLoadingId, deletingMonitorId, isS
       }}
     >
       <div className="flex items-start gap-4 lg:items-center">
-        <div className={`reference-icon-shell monitor-status-shell ${m.status === "up" ? "is-up" : m.status === "warning" ? "is-warning" : m.status === "critical" ? "is-critical" : "is-down"} flex h-10 w-10 shrink-0 items-center justify-center rounded-[15px] lg:h-12 lg:w-12`}>
+        <div className={`reference-icon-shell monitor-status-shell ${m.status === "up" ? "is-up" : m.status === "warning" ? "is-warning" : m.status === "critical" ? "is-critical" : m.status === "checking" ? "is-checking" : "is-down"} flex h-10 w-10 shrink-0 items-center justify-center rounded-[15px] lg:h-12 lg:w-12`}>
           <span className={`pulse-dot ${m.status}`}></span>
         </div>
 
@@ -1035,8 +1055,8 @@ function MonitorRow({ m, onPing, onDelete, pingLoadingId, deletingMonitorId, isS
         <div className="ml-auto flex items-start gap-2 sm:gap-3">
           <div className="option-menu absolute top-[59px] right-[10px] z-10 min-w-[88px] text-right max-[480px]:right-[9px] lg:static lg:top-auto lg:right-auto">
             <div className="text-[11px] uppercase tracking-[0.16em] text-gray-500 font-mono">Response</div>
-            <div className={`text-xs md:text-sm font-semibold ${m.status === "down" ? "text-accent-red" : "text-slate-700 dark:text-white"}`}>
-              {m.status === "down" ? "—" : `${m.responseTime}ms`}
+            <div className={`text-xs md:text-sm font-semibold ${isReachableMonitorStatus(m.status) ? "text-slate-700 dark:text-white" : m.status === "checking" ? "text-sky-600 dark:text-sky-300" : "text-accent-red"}`}>
+              {isReachableMonitorStatus(m.status) ? `${m.responseTime}ms` : m.status === "checking" ? "Retrying..." : "—"}
             </div>
           </div>
 
@@ -1116,7 +1136,9 @@ function MonitorsList({ monitors, search, filter, onSearch, onFilter, onPing, on
     const s = search.toLowerCase();
     return monitors.filter((m) => {
       const matchSearch = m.name.toLowerCase().includes(s) || m.url.toLowerCase().includes(s);
-      const matchFilter = filter === "all" || m.status === filter;
+      const matchFilter = filter === "all"
+        || (filter === "up" && isReachableMonitorStatus(m.status))
+        || (filter === "down" && !isReachableMonitorStatus(m.status));
       return matchSearch && matchFilter;
     });
   }, [monitors, search, filter]);
@@ -1303,9 +1325,9 @@ function AddMonitorModal({ open, onClose, onSubmit }) {
                     d="M3 12h4l2-4 3 8 2-4h5"
                     fill="none"
                     stroke="white"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round" />
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinecap="round" />
                 </svg>
               </div>
               <div>
@@ -1475,6 +1497,8 @@ function PulseGuardDashboard() {
   const [deleteConfirmMonitor, setDeleteConfirmMonitor] = useState(null);
   const activePingIdsRef = useRef(new Set());
   const activePingTasksRef = useRef(new Map());
+  const retryPingStateRef = useRef(new Map());
+  const runMonitorPingRef = useRef(null);
   const pingLoadingStartedAtRef = useRef(0);
   const pingLoadingClearTimerRef = useRef(null);
   const fetchMonitorsRequestIdRef = useRef(0);
@@ -1505,6 +1529,34 @@ function PulseGuardDashboard() {
 
   useEffect(() => { monitorsRef.current = monitors; }, [monitors]);
 
+  const clearMonitorRetry = useCallback((monitorId) => {
+    const retryState = retryPingStateRef.current.get(monitorId);
+    if (retryState?.timeoutId) {
+      window.clearTimeout(retryState.timeoutId);
+    }
+    retryPingStateRef.current.delete(monitorId);
+  }, []);
+
+  const clearAllMonitorRetries = useCallback(() => {
+    retryPingStateRef.current.forEach((retryState) => {
+      if (retryState?.timeoutId) {
+        window.clearTimeout(retryState.timeoutId);
+      }
+    });
+    retryPingStateRef.current.clear();
+  }, []);
+
+  const getMonitorStatusWithRetryState = useCallback((status, monitorId) => {
+    if (isReachableMonitorStatus(status)) {
+      return status;
+    }
+
+    const failureCount = retryPingStateRef.current.get(monitorId)?.failureCount || 0;
+    return failureCount > 0 ? getRetryDisplayStatus(failureCount) : (status || "down");
+  }, []);
+
+  useEffect(() => () => { clearAllMonitorRetries(); }, [clearAllMonitorRetries]);
+
   const [liveClock, setLiveClock] = useState("--:--:--");
   const [liveNow, setLiveNow] = useState(() => Date.now());
   useEffect(() => {
@@ -1524,7 +1576,7 @@ function PulseGuardDashboard() {
     url: p.url,
     type: p.type || "api",
     interval: p.interval || 5,
-    status: p.lastStatus || "up",
+    status: getMonitorStatusWithRetryState(p.lastStatus || "up", p._id),
     createdAt: p.createdAt
       ? new Date(p.createdAt).getTime()
       : p.lastCheckedAt ? new Date(p.lastCheckedAt).getTime()
@@ -1536,7 +1588,7 @@ function PulseGuardDashboard() {
     uptime: 100,
     // FIX: Start with empty history — will be built from real pings, not random data
     history: [],
-  }), []);
+  }), [getMonitorStatusWithRetryState]);
 
   const mergeMonitors = useCallback((previousMonitors, nextMonitors) => {
     const previousById = new Map(previousMonitors.map((monitor) => [monitor.id, monitor]));
@@ -1582,6 +1634,7 @@ function PulseGuardDashboard() {
   const fetchMonitors = useCallback(async ({ silent = false } = {}) => {
     if (!isLoaded) return;
     if (!isSignedIn) {
+      clearAllMonitorRetries();
       suppressedMonitorIdsRef.current.clear();
       setMonitors([]);
       setLoadingProjects(false);
@@ -1608,6 +1661,22 @@ function PulseGuardDashboard() {
           const mappedMonitors = (Array.isArray(data) ? data : [])
             .map(dbToMonitor)
             .filter((monitor) => !suppressedMonitorIds.has(monitor.id));
+          const fetchedMonitorIds = new Set(mappedMonitors.map((monitor) => monitor.id));
+
+          retryPingStateRef.current.forEach((retryState, monitorId) => {
+            if (!fetchedMonitorIds.has(monitorId)) {
+              if (retryState?.timeoutId) {
+                window.clearTimeout(retryState.timeoutId);
+              }
+              retryPingStateRef.current.delete(monitorId);
+            }
+          });
+
+          mappedMonitors.forEach((monitor) => {
+            if (isReachableMonitorStatus(monitor.status)) {
+              clearMonitorRetry(monitor.id);
+            }
+          });
 
           // FIX: Use Promise.allSettled so one failed uptime fetch doesn't block all monitors
           const uptimeResults = await Promise.allSettled(
@@ -1649,7 +1718,7 @@ function PulseGuardDashboard() {
         setMonitorLoadMessage("Loading your monitors from database...");
       }
     }
-  }, [isLoaded, isSignedIn, getToken, dbToMonitor, mergeMonitors, showToast]);
+  }, [isLoaded, isSignedIn, getToken, dbToMonitor, mergeMonitors, showToast, clearAllMonitorRetries, clearMonitorRetry]);
 
   useEffect(() => { fetchMonitors(); }, [fetchMonitors]);
 
@@ -1692,23 +1761,36 @@ function PulseGuardDashboard() {
     };
   }, [isSignedIn, fetchMonitors]);
 
-  const applyPingResult = useCallback((monitor, result, { silent = false } = {}) => {
+  const applyMonitorPingState = useCallback((monitor, {
+    displayStatus,
+    historyStatus,
+    responseTime,
+    timestamp,
+    recordLog = true
+  }) => {
     if (!monitor || suppressedMonitorIdsRef.current.has(monitor.id)) return;
-    const ok = result.status === "up";
-    const nextTimestamp = result.timestamp ? new Date(result.timestamp).getTime() : Date.now();
+    const nextTimestamp = timestamp ? new Date(timestamp).getTime() : Date.now();
     setMonitors((previousMonitors) => previousMonitors.map((item) => {
       if (item.id !== monitor.id) return item;
-      return { ...item, status: ok ? "up" : "down", responseTime: ok ? result.responseTime : 0, lastCheck: nextTimestamp, history: buildHistoryFromPrevious(item.history, ok ? "up" : "down") };
+      return {
+        ...item,
+        status: displayStatus,
+        responseTime: historyStatus === "up" ? responseTime : 0,
+        lastCheck: nextTimestamp,
+        history: buildHistoryFromPrevious(item.history, historyStatus)
+      };
     }));
+
+    if (!recordLog) return;
+
     pushPingLog(monitor.id, {
       projectId: monitor.id,
       projectName: monitor.name,
-      status: ok ? "up" : "down",
-      responseTime: ok ? result.responseTime : 0,
-      timestamp: result.timestamp || new Date().toISOString(),
+      status: historyStatus,
+      responseTime: historyStatus === "up" ? responseTime : 0,
+      timestamp: timestamp || new Date().toISOString(),
     });
-    if (!silent) showToast(ok ? `${monitor.name}  ${result.responseTime}ms` : `${monitor.name} is down`);
-  }, [pushPingLog, showToast]);
+  }, [pushPingLog]);
 
   const startPingLoading = useCallback((monitorId) => {
     if (pingLoadingClearTimerRef.current) { window.clearTimeout(pingLoadingClearTimerRef.current); pingLoadingClearTimerRef.current = null; }
@@ -1728,10 +1810,103 @@ function PulseGuardDashboard() {
 
   useEffect(() => () => { if (pingLoadingClearTimerRef.current) window.clearTimeout(pingLoadingClearTimerRef.current); }, []);
 
-  const runMonitorPing = useCallback(async (monitor, { silent = false, showSpinner = false } = {}) => {
+  const scheduleMonitorRetry = useCallback((monitorId, failureCount) => {
+    const existingRetryState = retryPingStateRef.current.get(monitorId);
+    if (existingRetryState?.timeoutId) {
+      window.clearTimeout(existingRetryState.timeoutId);
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      const latestMonitor = monitorsRef.current.find((item) => item.id === monitorId);
+      if (!latestMonitor || suppressedMonitorIdsRef.current.has(monitorId)) {
+        clearMonitorRetry(monitorId);
+        return;
+      }
+
+      retryPingStateRef.current.set(monitorId, {
+        failureCount,
+        timeoutId: null
+      });
+
+      void runMonitorPingRef.current?.(latestMonitor, {
+        silent: true,
+        showSpinner: false,
+        allowRetry: true,
+        notifyRecovery: true,
+        retryAttempt: true
+      });
+    }, MANUAL_RETRY_DELAY_MS);
+
+    retryPingStateRef.current.set(monitorId, {
+      failureCount,
+      timeoutId
+    });
+  }, [clearMonitorRetry]);
+
+  const handleMonitorPingSuccess = useCallback((monitor, result, { silent = false, notifyRecovery = false } = {}) => {
+    clearMonitorRetry(monitor.id);
+    applyMonitorPingState(monitor, {
+      displayStatus: "up",
+      historyStatus: "up",
+      responseTime: result.responseTime,
+      timestamp: result.timestamp
+    });
+
+    if (!silent || notifyRecovery) {
+      showToast(`${monitor.name} ${result.responseTime}ms`);
+    }
+  }, [applyMonitorPingState, clearMonitorRetry, showToast]);
+
+  const handleMonitorPingFailure = useCallback((monitor, {
+    result,
+    error,
+    silent = false,
+    allowRetry = false,
+    recordLog = true
+  }) => {
+    const timestamp = result?.timestamp || new Date().toISOString();
+    const failureCount = allowRetry
+      ? (retryPingStateRef.current.get(monitor.id)?.failureCount || 0) + 1
+      : 0;
+    const displayStatus = allowRetry ? getRetryDisplayStatus(failureCount) : "down";
+
+    if (allowRetry) {
+      scheduleMonitorRetry(monitor.id, failureCount);
+    } else {
+      clearMonitorRetry(monitor.id);
+    }
+
+    applyMonitorPingState(monitor, {
+      displayStatus,
+      historyStatus: "down",
+      responseTime: 0,
+      timestamp,
+      recordLog
+    });
+
+    if (!silent) {
+      if (allowRetry) {
+        showToast(`${monitor.name} is waking up. Retrying in 5 seconds...`);
+      } else {
+        showToast(error?.message ? `Ping failed: ${error.message}` : `${monitor.name} is down`);
+      }
+    }
+  }, [applyMonitorPingState, clearMonitorRetry, scheduleMonitorRetry, showToast]);
+
+  const runMonitorPing = useCallback(async (monitor, {
+    silent = false,
+    showSpinner = false,
+    allowRetry = false,
+    notifyRecovery = false,
+    retryAttempt = false
+  } = {}) => {
     if (!monitor) return;
     if (suppressedMonitorIdsRef.current.has(monitor.id)) return;
     if (!isSignedIn) { if (!silent) showToast("Please sign in first"); return; }
+
+    if (allowRetry && !retryAttempt) {
+      clearMonitorRetry(monitor.id);
+    }
 
     const existingTask = activePingTasksRef.current.get(monitor.id);
     if (existingTask) {
@@ -1739,9 +1914,29 @@ function PulseGuardDashboard() {
       if (!silent) showToast(`Pinging ${monitor.name}...`);
       try {
         const result = await existingTask;
-        if (!silent) showToast(result.status === "up" ? `${monitor.name} ${result.responseTime}ms` : `${monitor.name} is down`);
+        if (result.status === "up") {
+          if (!silent || notifyRecovery) showToast(`${monitor.name} ${result.responseTime}ms`);
+        } else if (allowRetry && !retryPingStateRef.current.has(monitor.id)) {
+          handleMonitorPingFailure(monitor, { result, silent, allowRetry, recordLog: false });
+        } else if (!silent) {
+          showToast(allowRetry ? `${monitor.name} is waking up. Retrying in 5 seconds...` : `${monitor.name} is down`);
+        }
       } catch (err) {
-        if (!silent) showToast(`Ping failed: ${err.message}`);
+        if (allowRetry && !retryPingStateRef.current.has(monitor.id)) {
+          handleMonitorPingFailure(monitor, {
+            result: {
+              status: "down",
+              responseTime: 0,
+              timestamp: new Date().toISOString()
+            },
+            error: err,
+            silent,
+            allowRetry,
+            recordLog: false
+          });
+        } else if (!silent) {
+          showToast(allowRetry ? `${monitor.name} is waking up. Retrying in 5 seconds...` : `Ping failed: ${err.message}`);
+        }
       } finally {
         if (showSpinner) stopPingLoading(monitor.id);
       }
@@ -1756,16 +1951,42 @@ function PulseGuardDashboard() {
 
     try {
       const result = await pingTask;
-      applyPingResult(monitor, result, { silent });
+      if (result.status === "up") {
+        handleMonitorPingSuccess(monitor, result, { silent, notifyRecovery });
+      } else {
+        handleMonitorPingFailure(monitor, { result, silent, allowRetry });
+      }
     } catch (err) {
       console.error("pingUrl error:", err);
-      if (!silent) showToast(`Ping failed: ${err.message}`);
+      handleMonitorPingFailure(monitor, {
+        result: {
+          status: "down",
+          responseTime: 0,
+          timestamp: new Date().toISOString()
+        },
+        error: err,
+        silent,
+        allowRetry
+      });
     } finally {
       activePingIdsRef.current.delete(monitor.id);
       activePingTasksRef.current.delete(monitor.id);
       if (showSpinner) stopPingLoading(monitor.id);
     }
-  }, [isSignedIn, getToken, applyPingResult, showToast, startPingLoading, stopPingLoading]);
+  }, [
+    isSignedIn,
+    getToken,
+    showToast,
+    startPingLoading,
+    stopPingLoading,
+    clearMonitorRetry,
+    handleMonitorPingSuccess,
+    handleMonitorPingFailure
+  ]);
+
+  useEffect(() => {
+    runMonitorPingRef.current = runMonitorPing;
+  }, [runMonitorPing]);
 
   useEffect(() => {
     if (!isSignedIn || monitors.length === 0) return undefined;
@@ -1779,7 +2000,8 @@ function PulseGuardDashboard() {
       snapshot.forEach((monitor, index) => {
         const timeoutId = window.setTimeout(() => {
           timeoutIds.delete(timeoutId);
-          if (!cancelled) void runMonitorPing(monitor, { silent: true, showSpinner: false });
+          if (cancelled || retryPingStateRef.current.has(monitor.id)) return;
+          void runMonitorPing(monitor, { silent: true, showSpinner: false });
         }, index * AUTO_PING_STAGGER_MS);
         timeoutIds.add(timeoutId);
       });
@@ -1795,8 +2017,8 @@ function PulseGuardDashboard() {
   }, [isSignedIn, monitors.length, runMonitorPing]);
 
   const stats = useMemo(() => {
-    const onlineMonitors = monitors.filter((m) => m.status !== "down");
-    const downMonitors = monitors.filter((m) => m.status === "down");
+    const onlineMonitors = monitors.filter((m) => isReachableMonitorStatus(m.status));
+    const downMonitors = monitors.filter((m) => !isReachableMonitorStatus(m.status));
     const totalResponseTime = onlineMonitors.reduce((a, m) => a + m.responseTime, 0);
     const avg = Math.round(totalResponseTime / Math.max(onlineMonitors.length, 1)) || 0;
     const weeklyAdded = getWeeklyAddedCount(monitors, liveNow);
@@ -1818,7 +2040,21 @@ function PulseGuardDashboard() {
       setSelectedMonitorId(newMon.id);
       setMonitorLogs(newMon.id, []);
       setModalOpen(false);
-      showToast(`Monitor "${newMon.name}" added successfully`);
+      if (isReachableMonitorStatus(newMon.status)) {
+        showToast(`Monitor "${newMon.name}" added successfully`);
+      } else {
+        handleMonitorPingFailure(newMon, {
+          result: {
+            status: "down",
+            responseTime: 0,
+            timestamp: result.data?.lastCheckedAt || new Date().toISOString()
+          },
+          silent: true,
+          allowRetry: true,
+          recordLog: false
+        });
+        showToast(`Monitor "${newMon.name}" added. Server is waking up...`);
+      }
     } catch (err) {
       console.error("addProject error:", err);
       if (typeof setModalError === "function") {
@@ -1827,7 +2063,7 @@ function PulseGuardDashboard() {
         showToast(`${err.message}`);
       }
     }
-  }, [isSignedIn, getToken, monitors, dbToMonitor, setMonitorLogs, showToast, openSignIn]);
+  }, [isSignedIn, getToken, monitors, dbToMonitor, setMonitorLogs, showToast, openSignIn, handleMonitorPingFailure]);
 
   const handleDelete = useCallback(async (id) => {
     const m = monitors.find((x) => x.id === id);
@@ -1847,6 +2083,7 @@ function PulseGuardDashboard() {
       fetchMonitorsRequestIdRef.current += 1;
       activePingIdsRef.current.delete(id);
       activePingTasksRef.current.delete(id);
+      clearMonitorRetry(id);
       setMonitors((prev) => prev.filter((x) => x.id !== id));
       setPingLogsByMonitor((previous) => {
         if (!(id in previous)) return previous;
@@ -1864,12 +2101,12 @@ function PulseGuardDashboard() {
     } finally {
       setDeletingMonitorId((current) => (current === id ? null : current));
     }
-  }, [deleteConfirmMonitor, getToken, showToast]);
+  }, [deleteConfirmMonitor, getToken, showToast, clearMonitorRetry]);
 
   const liveHandlePing = useCallback(async (id) => {
     const monitor = monitorsRef.current.find((item) => item.id === id);
     setSelectedMonitorId(id);
-    await runMonitorPing(monitor, { silent: false, showSpinner: true });
+    await runMonitorPing(monitor, { silent: false, showSpinner: true, allowRetry: true });
   }, [runMonitorPing]);
 
   return (
