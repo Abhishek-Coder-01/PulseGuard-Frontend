@@ -104,7 +104,8 @@ function DesktopSignedInUser({ user, openUserProfile, signOut, isDashboard, lett
         </div>
         <a
           href="#dashboard"
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-400 text-gray-900 shadow-md transition-all duration-300 hover:rotate-45 hover:bg-white">
+          className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-400 text-gray-900 shadow-md transition-all duration-300 hover:rotate-45 hover:!bg-white dark:text-white hover:!text-black"
+        >
           <ArrowUpRight size={18} strokeWidth={2.4} />
         </a>
       </div>
@@ -312,10 +313,10 @@ export default function Navbar({
       }
 
       return (
-      notificationFeed.filter(
-        (notification) =>
-          !dismissedNotificationIds.includes(notification.key)
-      )
+        notificationFeed.filter(
+          (notification) =>
+            !dismissedNotificationIds.includes(notification.key)
+        )
       );
     },
     [dismissedNotificationIds, isNotificationPersistenceReady, notificationFeed]
@@ -562,15 +563,14 @@ export default function Navbar({
   }, [dismissedNotificationIds, dismissedStorageKey, isLoaded, isSignedIn, notificationStateHydrated]);
 
   const handleRemoveNotification = (notificationKey) => {
-    setDismissedNotificationIds((previous) =>
-      {
-        const next = previous.includes(notificationKey)
-          ? previous
-          : [...previous, notificationKey];
+    setDismissedNotificationIds((previous) => {
+      const next = previous.includes(notificationKey)
+        ? previous
+        : [...previous, notificationKey];
 
-        persistNotificationKeys(dismissedStorageKey, next);
-        return next;
-      }
+      persistNotificationKeys(dismissedStorageKey, next);
+      return next;
+    }
     );
     setNotificationFeed((previous) =>
       previous.filter((notification) => notification.key !== notificationKey)
@@ -667,125 +667,125 @@ export default function Navbar({
             </button>
 
             {shouldShowNotifications && (
-            <div ref={desktopNotificationsRef} className="relative hidden min-[1187px]:block">
-              <button
-                type="button"
-                onClick={() => setNotificationsOpen((previous) => !previous)}
-                className="group relative flex h-12 w-12 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:text-gray-900 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
-                aria-label="Notifications"
-                aria-expanded={notificationsOpen}
-                aria-haspopup="dialog"
-              >
-                <Bell className="relative h-4 w-4" strokeWidth={2.2} />
-                {unseenNotifications.length > 0 && (
-                  <React.Fragment>
-                    <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-red-500 shadow-lg shadow-red-500/30 ring-2 ring-white animate-pulse dark:ring-gray-900"></span>
-                    <span className="absolute right-2 top-2 h-3 w-3 rounded-full bg-red-400/20 opacity-75 animate-ping"></span>
-                  </React.Fragment>
-                )}
-              </button>
+              <div ref={desktopNotificationsRef} className="relative hidden min-[1187px]:block">
+                <button
+                  type="button"
+                  onClick={() => setNotificationsOpen((previous) => !previous)}
+                  className="group relative flex h-12 w-12 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:text-gray-900 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
+                  aria-label="Notifications"
+                  aria-expanded={notificationsOpen}
+                  aria-haspopup="dialog"
+                >
+                  <Bell className="relative h-4 w-4" strokeWidth={2.2} />
+                  {unseenNotifications.length > 0 && (
+                    <React.Fragment>
+                      <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-red-500 shadow-lg shadow-red-500/30 ring-2 ring-white animate-pulse dark:ring-gray-900"></span>
+                      <span className="absolute right-2 top-2 h-3 w-3 rounded-full bg-red-400/20 opacity-75 animate-ping"></span>
+                    </React.Fragment>
+                  )}
+                </button>
 
-              {notificationsOpen && (
-                <div className="absolute right-0 top-[calc(100%+14px)] z-[70] w-[360px] overflow-hidden rounded-[26px] border border-gray-200 bg-white/95 shadow-2xl backdrop-blur-2xl dark:border-gray-700 dark:bg-gray-900/95">
-                  <div className="border-b border-gray-200 px-5 py-4 dark:border-gray-700">
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-red-500 dark:text-red-400">
-                          Alerts
-                        </p>
-                        <h3 className="mt-1 text-sm font-semibold text-gray-900 dark:text-gray-100">
-                          Notifications
-                        </h3>
-                        <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">
-                          {notifications.length > 0
-                            ? `${notifications.length} live alert${notifications.length === 1 ? "" : "s"
-                            } from current monitor status`
-                            : "All clear. No active notifications right now."}
-                        </p>
+                {notificationsOpen && (
+                  <div className="absolute right-0 top-[calc(100%+14px)] z-[70] w-[360px] overflow-hidden rounded-[26px] border border-gray-200 bg-white/95 shadow-2xl backdrop-blur-2xl dark:border-gray-700 dark:bg-gray-900/95">
+                    <div className="border-b border-gray-200 px-5 py-4 dark:border-gray-700">
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-red-500 dark:text-red-400">
+                            Alerts
+                          </p>
+                          <h3 className="mt-1 text-sm font-semibold text-gray-900 dark:text-gray-100">
+                            Notifications
+                          </h3>
+                          <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">
+                            {notifications.length > 0
+                              ? `${notifications.length} live alert${notifications.length === 1 ? "" : "s"
+                              } from current monitor status`
+                              : "All clear. No active notifications right now."}
+                          </p>
+                        </div>
+                        {notifications.length > 0 && (
+                          <span className="inline-flex min-w-[2.2rem] items-center justify-center rounded-full border border-red-200 bg-red-50 px-2.5 py-1 text-[11px] font-semibold text-red-600 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-300">
+                            {notifications.length}
+                          </span>
+                        )}
                       </div>
-                      {notifications.length > 0 && (
-                        <span className="inline-flex min-w-[2.2rem] items-center justify-center rounded-full border border-red-200 bg-red-50 px-2.5 py-1 text-[11px] font-semibold text-red-600 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-300">
-                          {notifications.length}
-                        </span>
-                      )}
                     </div>
-                  </div>
 
-                  {notifications.length > 0 ? (
-                    <div className="notification-scrollbar max-h-[320px] overflow-y-auto px-3 py-3">
-                      {notifications.map((notification) => (
-                        <div
-                          key={notification.id}
-                          className="group mb-2 rounded-2xl border border-gray-200 bg-white/80 p-3.5 transition-all duration-200 hover:-translate-y-0.5 hover:border-gray-300 hover:shadow-md dark:border-gray-700 dark:bg-gray-800/70 dark:hover:border-gray-600"
-                        >
-                          <div className="flex items-start gap-3">
-                            <span
-                              className={`mt-1 h-2.5 w-2.5 flex-shrink-0 rounded-full shadow-lg ${getNotificationAccentClass(
-                                notification.level
-                              )}`}
-                            ></span>
-                            <div className="min-w-0 flex-1">
-                              <div className="flex items-center justify-between gap-3">
-                                <div className="min-w-0">
-                                  <p className="truncate text-sm font-semibold text-gray-900 dark:text-gray-100">
-                                    {notification.title}
-                                  </p>
-                                  <p className="mt-1 inline-block min-w-[4.75rem] whitespace-nowrap text-xs tabular-nums text-gray-600 dark:text-gray-400">
-                                    {notification.time}
-                                  </p>
-                                </div>
-                                <span
-                                  className={`rounded-full border px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] ${getNotificationBadgeClass(
-                                    notification.level
-                                  )}`}
-                                >
-                                  {notification.level}
-                                </span>
-                              </div>
-                              <div className="mt-3 flex items-start justify-between gap-3">
-                                <p className="min-h-[2.5rem] break-words pr-1 text-xs leading-5 text-gray-700 dark:text-gray-300">
-                                  {notification.detail}
-                                </p>
-                                <button
-                                  type="button"
-                                  onClick={() => handleRemoveNotification(notification.key)}
-                                  className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl border border-gray-200 bg-gray-50 text-gray-500 transition-all duration-200 hover:border-red-200 hover:bg-red-50 hover:text-red-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:border-red-500/20 dark:hover:bg-red-500/10 dark:hover:text-red-300"
-                                  aria-label={`Remove ${notification.title} notification`}
-                                >
-                                  <svg
-                                    className="h-4 w-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    viewBox="0 0 24 24"
+                    {notifications.length > 0 ? (
+                      <div className="notification-scrollbar max-h-[320px] overflow-y-auto px-3 py-3">
+                        {notifications.map((notification) => (
+                          <div
+                            key={notification.id}
+                            className="group mb-2 rounded-2xl border border-gray-200 bg-white/80 p-3.5 transition-all duration-200 hover:-translate-y-0.5 hover:border-gray-300 hover:shadow-md dark:border-gray-700 dark:bg-gray-800/70 dark:hover:border-gray-600"
+                          >
+                            <div className="flex items-start gap-3">
+                              <span
+                                className={`mt-1 h-2.5 w-2.5 flex-shrink-0 rounded-full shadow-lg ${getNotificationAccentClass(
+                                  notification.level
+                                )}`}
+                              ></span>
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-center justify-between gap-3">
+                                  <div className="min-w-0">
+                                    <p className="truncate text-sm font-semibold text-gray-900 dark:text-gray-100">
+                                      {notification.title}
+                                    </p>
+                                    <p className="mt-1 inline-block min-w-[4.75rem] whitespace-nowrap text-xs tabular-nums text-gray-600 dark:text-gray-400">
+                                      {notification.time}
+                                    </p>
+                                  </div>
+                                  <span
+                                    className={`rounded-full border px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] ${getNotificationBadgeClass(
+                                      notification.level
+                                    )}`}
                                   >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      d="M6 18L18 6M6 6l12 12"
-                                    />
-                                  </svg>
-                                </button>
+                                    {notification.level}
+                                  </span>
+                                </div>
+                                <div className="mt-3 flex items-start justify-between gap-3">
+                                  <p className="min-h-[2.5rem] break-words pr-1 text-xs leading-5 text-gray-700 dark:text-gray-300">
+                                    {notification.detail}
+                                  </p>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRemoveNotification(notification.key)}
+                                    className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl border border-gray-200 bg-gray-50 text-gray-500 transition-all duration-200 hover:border-red-200 hover:bg-red-50 hover:text-red-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:border-red-500/20 dark:hover:bg-red-500/10 dark:hover:text-red-300"
+                                    aria-label={`Remove ${notification.title} notification`}
+                                  >
+                                    <svg
+                                      className="h-4 w-4"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      strokeWidth="2"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        d="M6 18L18 6M6 6l12 12"
+                                      />
+                                    </svg>
+                                  </button>
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="px-5 py-10 text-center">
-                
-                      <p className="mt-4 text-sm font-semibold text-gray-900 dark:text-gray-100">
-                        No pending alerts
-                      </p>
-                      <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">
-                        Everything looks stable. New incidents will appear here.
-                      </p>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="px-5 py-10 text-center">
+
+                        <p className="mt-4 text-sm font-semibold text-gray-900 dark:text-gray-100">
+                          No pending alerts
+                        </p>
+                        <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">
+                          Everything looks stable. New incidents will appear here.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             )}
 
             {!isLoaded ? (
