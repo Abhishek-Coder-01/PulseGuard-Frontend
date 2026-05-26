@@ -1,5 +1,5 @@
 // const DEFAULT_API_ORIGIN = "https://pulseguard-backend-yuyh.onrender.com";(Ater one  month) wait
-const DEFAULT_API_ORIGIN = "https://pulseguard-backend-zkbp.onrender.com/";
+const DEFAULT_API_ORIGIN = "https://pulseguard-backend-zkbp.onrender.com";
 const API_PREFIX = "/api";
 const DEFAULT_TIMEOUT_MS = 15000;
 const PROJECT_CREATION_TIMEOUT_MS = 40000;
